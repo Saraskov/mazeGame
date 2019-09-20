@@ -1,0 +1,9 @@
+canvas {
+    border: 3px solid black;
+    margin: 0 auto;
+}
+
+.dragon {
+    background: pink;
+    /* background-image: url(illustrationer/dragon.png); */
+}
