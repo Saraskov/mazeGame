@@ -19,6 +19,24 @@ let arrayCanvas = [
     [0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0]
 ];
 
+let arrayCanvas2 = [
+    [0, 1, 0, 0, 1, 1, 1, 0, 1, 2, 0, 1, 1, 1, 1], 
+    [3, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+    [0, 1, 0, 2, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+    [0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1],
+    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0],
+    [0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0],
+    [0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0],
+    [0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1, 0, 2, 0],
+    [0, 1, 1, 0, 1, 0, 2, 0, 0, 1, 0, 0, 0, 1, 1],
+    [1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0],
+    [0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0], 
+    [0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0],
+    [0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 2, 0, 1, 1],
+    [0, 1, 1, 2, 1, 1, 1, 0, 1, 1, 1, 1, 2, 1, 0],
+    [0, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 0, 0, 0, 0]
+];
+
 let size = 40;
 
 let j = 0; //y
@@ -57,11 +75,14 @@ sheep.src='illustrationer/sheep.png';
 let fire=new Image();
 fire.src='illustrationer/fire.png';
 
+let treefire=new Image();
+treefire.src='illustrationer/treefire.png';
+
 //Audio variabler
 let goalSound= new Audio('lyde/sheep.mp3');
 let bite= new Audio('lyde/dragonBite.mp3');
 let hungry = new Audio('lyde/stomachGrowling.mp3');
-let swoosh = new Audio('lyde/swoosh.mp3');
+let fireSound = new Audio('lyde/fire.mp3');
 
 
 function createMaze() {
@@ -87,7 +108,8 @@ function createMaze() {
 }
 
 window.addEventListener("keydown", function(event){
-    swoosh.play();
+    playSound()
+    //swoosh.play();
     defaultScore();
     switch (event.keyCode) {
         case 38: //Key up
@@ -95,6 +117,8 @@ window.addEventListener("keydown", function(event){
                 arrayCanvas[player.j - 1][player.i] = -1;
                 arrayCanvas[player.j][player.i] = 0; 
 
+            } else if (arrayCanvas[player.j - 1][player.i] == 1){
+                forestFire();
             } else if (arrayCanvas[player.j - 1][player.i] == 2) {
                 bite.play();
                 arrayCanvas[player.j - 1][player.i] = -1; 
@@ -112,6 +136,8 @@ window.addEventListener("keydown", function(event){
 
             arrayCanvas[player.j][player.i - 1] = -1;
             arrayCanvas[player.j][player.i] = 0;
+        } else if (arrayCanvas[player.j][player.i - 1] == 1) {
+            forestFire();
         } else if (arrayCanvas[player.j][player.i - 1] == 2) {
             bite.play();
             arrayCanvas[player.j][player.i - 1] = -1;
@@ -130,6 +156,8 @@ window.addEventListener("keydown", function(event){
             arrayCanvas[player.j][player.i + 1] = -1;
             arrayCanvas[player.j][player.i] = 0;
 
+        } else if (arrayCanvas[player.j][player.i + 1] == 1) {
+            forestFire();
         } else if (arrayCanvas[player.j][player.i + 1] == 2) {
             bite.play();
             arrayCanvas[player.j][player.i + 1] = -1; 
@@ -148,6 +176,8 @@ window.addEventListener("keydown", function(event){
             arrayCanvas[player.j + 1][player.i] = -1; 
             arrayCanvas[player.j][player.i] = 0;
 
+        } else if (arrayCanvas[player.j + 1][player.i] == 1) {
+            forestFire();
         } else if (arrayCanvas[player.j + 1][player.i] == 2) {
             bite.play();
             arrayCanvas[player.j + 1][player.i] = -1;
@@ -180,24 +210,22 @@ function checkFlames(){
         score += point;
         msg = "Din drage er mæt! Din score er: " + score;
         alert(msg);
-        location.reload();
+        location.reload(); 
     } else {
         hungry.play();
         msg="Du skal bruge mere ild, for at spise fåret!";
-        alert(msg);
-        location.reload();
+        endGame();
     }
 }
 
 //Denne function virker ikke
 function forestFire() {
-    for(j = 0; j<arrayCanvas.length; j++){
-        for(i = 0; i<arrayCanvas[j].length; i++){
-            if (arrayCanvas[j][i] == 1){
-                ctx.drawImage(fire, i*size, j*size, size, size);
-            }
-        }
-    }
+    fireSound.play();
+    tree.src = treefire.src;
+    createMaze();
+    
+    msg = "Du startede en skovbrænd!"
+    setTimeout(endGame, 200);
 }
 
 //funktion der siger -1 hver gang man trykker på en keyboard tast
@@ -206,8 +234,7 @@ function defaultScore(){
     scoreText.innerHTML = score;
     if (score <= 0) {
         msg = "Du har ikke flere træk tilbage"
-        alert(msg);
-        location.reload();
+        endGame();
     }
 }
 
@@ -216,6 +243,18 @@ function flameScore() {
     score += firePoint;
     scoreText.innerHTML = score;
 }
+
+function playSound(){
+    let soundPlace = document.querySelector('#swoosh');
+    soundPlace.setAttribute("src", "lyde/swoosh.mp3");
+    soundPlace.play();
+}
+
+function endGame() {
+    alert(msg);
+    location.reload();
+}
+
 
 
 
